@@ -40,7 +40,7 @@ type ConfigType = Mapping[str, Any] | None
 
 
 class GismeteoFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
-    """Обработчик опций конфигурации Gismeteo."""
+    """Config flow for Gismeteo."""
 
     VERSION = 1
     CONNECTION_CLASS = config_entries.CONN_CLASS_CLOUD_POLL
@@ -119,18 +119,20 @@ class GismeteoFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
 
 class GismeteoOptionsFlowHandler(config_entries.OptionsFlow):
-    """Gismeteo config flow options handler."""
+    """Обработчик опций конфигурации Gismeteo."""
 
     def __init__(self, config_entry: ConfigEntry) -> None:
-        """Initialize HACS options flow."""
-        self.config_entry = config_entry
+        """Инициализация опций Gismeteo."""
+        super().__init__()  # Инициализируем родительский класс
         self.options = dict(config_entry.options)
+        # Правильно сохраняем ссылку на config_entry
+        self._config_entry = config_entry
 
     async def async_step_init(
-        self, user_input: ConfigType = None  # noqa: ARG002
-    ) -> config_entries.ConfigFlowResult:  # pylint: disable=unused-argument
-        """Manage the options."""
-        if self.config_entry.source == config_entries.SOURCE_IMPORT:
+        self, user_input: ConfigType = None
+    ) -> config_entries.ConfigFlowResult:
+        """Управление опциями."""
+        if self._config_entry.source == config_entries.SOURCE_IMPORT:
             return self.async_abort(reason="no_options_available")
 
         return await self.async_step_user()
@@ -138,7 +140,7 @@ class GismeteoOptionsFlowHandler(config_entries.OptionsFlow):
     async def async_step_user(
         self, user_input: ConfigType = None
     ) -> config_entries.ConfigFlowResult:
-        """Handle a flow initialized by the user."""
+        """Обработка настроек пользователя."""
         if user_input is not None:
             if CONF_FORECAST_DAYS in self.options:
                 self.options[CONF_FORECAST_DAYS] = None
@@ -158,12 +160,13 @@ class GismeteoOptionsFlowHandler(config_entries.OptionsFlow):
                         vol.Optional(CONF_FORECAST_DAYS): forecast_days_int,
                     }
                 ),
-                self.config_entry.options,
+                self._config_entry.options,  # Используем правильно сохраненную запись
             ),
         )
 
     async def _update_options(self) -> config_entries.ConfigFlowResult:
-        """Update config entry options."""
+        """Обновление опций конфигурации."""
         return self.async_create_entry(
-            title=self.config_entry.data.get(CONF_NAME), data=self.options
+            title=self._config_entry.data.get(CONF_NAME),  # Используем сохраненную запись
+            data=self.options
         )
