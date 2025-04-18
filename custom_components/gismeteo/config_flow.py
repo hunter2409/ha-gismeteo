@@ -40,7 +40,7 @@ type ConfigType = Mapping[str, Any] | None
 
 
 class GismeteoFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
-    """Config flow for Gismeteo."""
+    """Обработчик опций конфигурации Gismeteo."""
 
     VERSION = 1
     CONNECTION_CLASS = config_entries.CONN_CLASS_CLOUD_POLL
